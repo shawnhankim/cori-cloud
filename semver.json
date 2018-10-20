@@ -1,0 +1,9 @@
+{
+    "major" : 0,
+    "minor" : 1,
+    "patch" : 0,
+    "artifact_name": "cori-cloud",
+    "prerelease_tag": "alpha1",
+    "software_repository": "cori-alpha",
+    "docker_registry": ""
+}
