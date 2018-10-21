@@ -4,16 +4,18 @@
 # PACKAGE refers the main directory of the project and MAIN is the entry point.
 #
 
-PACKAGE  = cori-cloud
-MAIN 	 = main.go
-BIN      = bin
-OUT_DIR ?= $(BIN)
+# PACKAGE refers the main directory of the project and MAIN is the entry point.
+PACKAGE   = cori-cloud
+MAIN 	  = main.go
+BIN       = bin
+OUT_DIR  ?= $(BIN)
+GO_GCFLAGS="-newexport=0"
 
 # tools and shortcuts
 GO      = go
 GODOC   = godoc
 GOFMT   = gofmt
-GO_PKGS = $(shell $(GO) list ./... | grep -v /vendor/)
+GO_PKGS = $(shell $(GO) list ./... | grep -v /vendor/ )
 DEP   	= dep
 TIMEOUT = 15
 V 		= 1
@@ -26,25 +28,7 @@ define update_dependencies
 	$Q cd $(BASE) && pwd && GOPATH=$(GOPATH) $(DEP) ensure -update
 endef
 
-define linker_flags
--X main.version=$(SEMVER) \
--X main.commit =$(SEMVER_COMMIT_SHA)
-endef
-
-# Version Variables
-SEMVER_NUMBER            = $(shell [ -f build_version ] && sed -En 's/.*SEMVER_NUMBER=//p'            build_version)
-SEMVER_ARTIFACT          = $(shell [ -f build_version ] && sed -En 's/.*SEMVER_ARTIFACT=//p'          build_version)
-SEMVER_DOCKER_TAG        = $(shell [ -f build_version ] && sed -En 's/.*SEMVER_DOCKER_TAG=//p'        build_version)
-SEMVER_ARTIFACT_FILENAME = $(shell [ -f build_version ] && sed -En 's/.*SEMVER_ARTIFACT_FILENAME=//p' build_version)
-
-ARCHIVE                  = $(SEMVER_ARTIFACT_FILENAME).tgz
-ARTIFACT                 = $(OUT_DIR)/$(ARCHIVE)
-
-define clean_semver_comp
-$(subst _,.,$(subst /,.,$(1)))
-endef
-
-export GOPATH SEMVER_NUMBER SEMVER_ARTIFACT_FILENAME SEMVER_ARTIFACT SEMVER_DOCKER_TAG
+export GOPATH 
 
 .PHONY: all fmt clean version build build-container package semver upload
 
@@ -68,16 +52,14 @@ deps:
 	dep ensure -v
 
 build:; $(info $(M) building executable image of cori-cloud...) @
-	$Q CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo \
+	$Q CGO_ENABLED=0 go build -a -installsuffix cgo \
 		-tags 'release netgo' \
-		-ldflags '$(linker_flags) -s' \
 		-o $(OUT_DIR)/$(PACKAGE) $(MAIN)
 
-build-container: ; $(info $(M) building docker file...) @
-	docker build --rm -t $(SEMVER_DOCKER_TAG) -f Dockerfile .
-
-semver: ; $(info $(M) generating SEMVER locally ...) @
-	tycho
+build-linux:; $(info $(M) building executable image of cori-cloud...) @
+	$Q CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo \
+		-tags 'release netgo' \
+		-o $(OUT_DIR)/$(PACKAGE) $(MAIN)
 
 templates: ; $(info $(M) processing templates..) @
 	rm -rf deploy
