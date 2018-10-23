@@ -28,5 +28,8 @@ func main() {
 	fmt.Printf("This is the cori-cloud.\n")
 
 	// Sample Code : create an instance on AWS
-	sampleAWS.CreateAWSInstance()
+	// sampleAWS.CreateAWSInstance()
+
+	// Sample Code : create an instance on AWS
+	sampleAWS.CreateAWSSecurityGroup()
 }
