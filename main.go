@@ -31,5 +31,11 @@ func main() {
 	// sampleAWS.CreateAWSInstance()
 
 	// Sample Code : create an instance on AWS
-	sampleAWS.CreateAWSSecurityGroup()
+	// sampleAWS.CreateAWSSecurityGroup()
+
+	// Sample Code : create an IAM role on AWS
+	// sampleAWS.CreateAWSRole()
+
+	// Sample Code : create an EC2 instance on AWS
+	sampleAWS.CreateAWSEC2Instance()
 }

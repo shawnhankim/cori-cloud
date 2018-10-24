@@ -33,10 +33,11 @@
     "private/protocol/rest",
     "private/protocol/xml/xmlutil",
     "service/ec2",
+    "service/iam",
     "service/sts"
   ]
-  revision = "c0037b52736b07cea4e0cb6521f7995adef833bc"
-  version = "v1.15.59"
+  revision = "9a79cc876234949427d966249a09fc98e7864bde"
+  version = "v1.15.61"
 
 [[projects]]
   name = "github.com/jmespath/go-jmespath"
@@ -46,6 +47,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4a552a7b85d632b0248f4ae310d18a11f347670efcbe7c3bfb6f5e1dab21d51c"
+  inputs-digest = "19cc1fffe2de67545f7372b0d8dd6d303c0cbc57cedd9b4e92267dd197d0e850"
   solver-name = "gps-cdcl"
   solver-version = 1
