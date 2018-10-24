@@ -37,5 +37,9 @@ func main() {
 	// sampleAWS.CreateAWSRole()
 
 	// Sample Code : create an EC2 instance on AWS
-	sampleAWS.CreateAWSEC2Instance()
+	// sampleAWS.CreateAWSEC2Instance()
+
+	// Sample Code : terminate an EC2 instance on AWS
+	sampleAWS.TerminateInstance("i-0ff22d13ab2c30744")
+
 }
