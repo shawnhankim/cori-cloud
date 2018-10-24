@@ -17,52 +17,92 @@
 package sample
 
 import (
-	"log"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-
 	coriAWS "github.com/shawnhankim/cori-cloud/pkg/aws"
 	util "github.com/shawnhankim/cori-cloud/pkg/util"
 )
 
-// CreateAWSEC2Instance creates an EC2 instance on AWS
-func CreateAWSEC2Instance() (string, error) {
-
+// TerminateInstance is the sample code to terminate EC2 instance on AWS
+func TerminateInstance(instanceID string) error {
 	// Display starting message
-	util.CoriPrintln("Start creating a sample EC2 instance on AWS.")
+	util.CoriPrintln("Start terminating a sample EC2 instance on AWS.")
 
 	// Declare sample variables
 	sampleRegion := "us-west-2"
 	sampleProfile := "my-account"
-	sampleAMIid := "ami-0dfeec5739bc7c5d7" // ami-e7527ed7
-	sampleInstType := "t2.large"
 
 	// Create session
 	sess, err := coriAWS.CreateSession(sampleRegion, sampleProfile)
 	if err != nil {
 		util.CoriPrintf("Failed to create session : %v\n", err)
-		return "", err
+		return err
+	}
+
+	// Create EC2 instance session
+	svc := ec2.New(sess)
+
+	// Terminate EC2 instnce on AWS
+	return TerminateAWSEC2Instance(svc, instanceID)
+}
+
+// TerminateAWSEC2Instance terminates an EC2 instance on AWS
+func TerminateAWSEC2Instance(svc *ec2.EC2, instanceID string) error {
+
+	// Get input parameter to be terminated
+	params := &ec2.TerminateInstancesInput{
+		InstanceIds: []*string{
+			aws.String(instanceID),
+		},
+	}
+
+	// Germinate EC2 instance on AWS
+	resp, err := svc.TerminateInstances(params)
+	if err != nil {
+		util.CoriPrintf("Failed to terminate instance : %s, error : %v", instanceID, err)
+	} else {
+		util.CoriPrintf("Successfully terminated instance : %s, %v", instanceID, resp)
+	}
+	return err
+}
+
+/*
+// TerminateAWSEC2Instance terminates an EC2 instance on AWS
+func TerminateAWSEC2Instance(instanceId string) error {
+
+	// Display starting message
+	util.CoriPrintln("Start terminating a sample EC2 instance on AWS.")
+
+	// Declare sample variables
+	sampleRegion := "us-west-2"
+	sampleProfile := "my-account"
+
+	// Create session
+	sess, err := coriAWS.CreateSession(sampleRegion, sampleProfile)
+	if err != nil {
+		util.CoriPrintf("Failed to create session : %v\n", err)
+		return err
 	}
 
 	// Create EC2 instance
 	svc := ec2.New(sess)
 
-	// Run EC2 instance
-	runResult, err := svc.RunInstances(&ec2.RunInstancesInput{
-		ImageId:      aws.String(sampleAMIid),
-		InstanceType: aws.String(sampleInstType),
-		MinCount:     aws.Int64(1),
-		MaxCount:     aws.Int64(1),
-	})
-
-	if err != nil {
-		log.Println("Could not create instance", err)
-		return "", err
+	input := &ec2.TerminateInstancesInput{
+		InstanceIds: []*string{
+			aws.String(instanceId),
+		},
+		DryRun: aws.Bool(true),
 	}
 
-	instanceID := *runResult.Instances[0].InstanceId
-	log.Println("Created instance", instanceID)
+	// Run EC2 instance
+	runResult, err := svc.RunInstances(input)
+
+	if err != nil {
+		log.Printf("Could not terminate instance : %s, error : %v", instanceID, err)
+		return err
+	}
+
+	log.Println("Created instance", *runResult.Instances[0].InstanceId)
 
 	// Add tags to the created instance
 	_, errtag := svc.CreateTags(&ec2.CreateTagsInput{
@@ -84,10 +124,12 @@ func CreateAWSEC2Instance() (string, error) {
 	})
 	if errtag != nil {
 		log.Println("Could not create tags for instance", runResult.Instances[0].InstanceId, errtag)
-		return "", err
+		return err
 	}
 
 	log.Println("Successfully tagged instance")
-	return "", nil
+	return nil
 
 }
+
+*/
