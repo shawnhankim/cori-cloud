@@ -134,39 +134,6 @@ func ExampleEC2CreateLaunchTemplate() (string, error) {
 	return "", nil
 }
 
-/*
-// To associate an IAM instance profile with an instance
-//
-// This example associates an IAM instance profile named admin-role with the specified
-// instance.
-func ExampleEC2AssociateIamInstanceProfile() {
-	svc := ec2.New(session.New())
-	input := &ec2.AssociateIamInstanceProfileInput{
-		IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
-			Name: aws.String("shawn-sample-iam-role"),
-		},
-		InstanceId: aws.String("i-123456789abcde123"),
-	}
-
-	result, err := svc.AssociateIamInstanceProfile(input)
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			default:
-				fmt.Println(aerr.Error())
-			}
-		} else {
-			// Print the error, cast err to awserr.Error to get the Code and
-			// Message from an error.
-			fmt.Println(err.Error())
-		}
-		return
-	}
-
-	fmt.Println(result)
-}
-*/
-
 func GetSampleCommonInput() *ec2.RunInstancesInput {
 	return &ec2.RunInstancesInput{
 		ImageId:      aws.String("ami-0690d7168760bcb2d"),
@@ -206,19 +173,37 @@ func GetSampleNetworkInput() *ec2.RunInstancesInput {
 }
 
 func GetSampleSecurityGroupInput() *ec2.RunInstancesInput {
-	input := GetSampleCommonInput()
-	input.SecurityGroupIds = []*string{
-		aws.String("sg-002b4e2ccb97b66c7"), //sg-002b4e2ccb97b66c7"),
-	}
-	return input
-}
 
-func GetSampleInstanceInput() *ec2.RunInstancesInput {
-	input := GetSampleNetworkInput()
-	input.SecurityGroups = []*string{
-		aws.String("shawnkim-ssh"),
+	return &ec2.RunInstancesInput{
+		IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
+			Name: aws.String("Shawn-1024-09pm-BlueInstanceIAMProfile-1KYJ91GRM5LVQ"),
+		},
+		ImageId:      aws.String("ami-0690d7168760bcb2d"),
+		InstanceType: aws.String("t2.large"),
+		KeyName:      aws.String("shawnkim-ssh"),
+		MinCount:     aws.Int64(1),
+		MaxCount:     aws.Int64(1),
+		SecurityGroupIds: []*string{
+			aws.String("sg-002b4e2ccb97b66c7"),
+		},
+		SubnetId: aws.String("subnet-059d49181a476ccdb"),
+		TagSpecifications: []*ec2.TagSpecification{
+			{
+				ResourceType: aws.String("instance"),
+				Tags: []*ec2.Tag{
+					{
+						Key:   aws.String("Name"),
+						Value: aws.String("Shawn-sample")},
+					{
+						Key:   aws.String("AutoPrune"),
+						Value: aws.String("False")},
+					{
+						Key:   aws.String("Owner"),
+						Value: aws.String("Shawn")},
+				},
+			},
+		},
 	}
-	return input
 }
 
 // CreateAWSEC2Instance creates an EC2 instance on AWS
@@ -248,36 +233,41 @@ func CreateAWSEC2Instance() (string, error) {
 		return "", err
 	}
 	instanceID := *runResult.Instances[0].InstanceId
-	log.Println("Created instance", instanceID)
+	util.CoriPrintf("Created instance : %s \n", instanceID)
 
-	// Attach security group to EC2 instance
-	/*
-		input := &ec2.DescribeSecurityGroupsInput{
-			GroupIds: []*string{
-				aws.String("sg-002b4e2ccb97b66c7"),
-			},
-		}
-
-			result, err := svc.DescribeSecurityGroups(input)
-			if err != nil {
-				if aerr, ok := err.(awserr.Error); ok {
-					switch aerr.Code() {
-					default:
-						fmt.Println(aerr.Error())
-					}
-				} else {
-					// Print the error, cast err to awserr.Error to get the Code and
-					// Message from an error.
-					fmt.Println(err.Error())
-				}
-				return instanceID, err
-			}
-			if err != nil {
-				log.Println("Could not attach security group to EC2 instance", err)
-				return "", err
-			}
-			util.CoriPrintf("Attached security group : %v\n", result)
-	*/
+	//ExampleEC2AssociateIamInstanceProfile(svc, instanceID)
 	return instanceID, nil
+
+}
+
+// To associate an IAM instance profile with an instance
+//
+// This example associates an IAM instance profile named admin-role with the specified
+// instance.
+func ExampleEC2AssociateIamInstanceProfile(ec2Svc *ec2.EC2, instanceID string) error { // instance id
+
+	input := &ec2.AssociateIamInstanceProfileInput{
+		IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
+			Name: aws.String("Shawn-1024-09pm-BlueInstanceIAMRole-4S3S9V0G1O60"),
+		},
+		InstanceId: aws.String(instanceID),
+	}
+
+	result, err := ec2Svc.AssociateIamInstanceProfile(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			default:
+				util.CoriPrintln(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			util.CoriPrintln(err.Error())
+		}
+		return err
+	}
+	util.CoriPrintln(result)
+	return nil
 
 }
