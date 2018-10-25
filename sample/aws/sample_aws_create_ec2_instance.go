@@ -18,7 +18,6 @@ package sample
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -178,13 +177,13 @@ func GetSampleSecurityGroupInput() *ec2.RunInstancesInput {
 		IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
 			Name: aws.String("Shawn-1024-09pm-BlueInstanceIAMProfile-1KYJ91GRM5LVQ"),
 		},
-		ImageId:      aws.String("ami-0690d7168760bcb2d"),
-		InstanceType: aws.String("t2.large"),
+		ImageId:      aws.String("ami-0bccdb3b05638f96a"),
+		InstanceType: aws.String("c4.large"),
 		KeyName:      aws.String("shawnkim-ssh"),
 		MinCount:     aws.Int64(1),
 		MaxCount:     aws.Int64(1),
 		SecurityGroupIds: []*string{
-			aws.String("sg-002b4e2ccb97b66c7"),
+			aws.String("sg-0d8f654e29342a47b"),
 		},
 		SubnetId: aws.String("subnet-059d49181a476ccdb"),
 		TagSpecifications: []*ec2.TagSpecification{
@@ -200,6 +199,9 @@ func GetSampleSecurityGroupInput() *ec2.RunInstancesInput {
 					{
 						Key:   aws.String("Owner"),
 						Value: aws.String("Shawn")},
+					{
+						Key:   aws.String("KubernetesCluster"),
+						Value: aws.String("Shawn-sample")},
 				},
 			},
 		},
@@ -219,7 +221,7 @@ func CreateAWSEC2Instance() (string, error) {
 	// Create session
 	sess, err := coriAWS.CreateSession(sampleRegion, sampleProfile)
 	if err != nil {
-		util.CoriPrintf("Failed to create session : %v\n", err)
+		util.CoriPrintln("Failed to create session", err)
 		return "", err
 	}
 
@@ -229,12 +231,19 @@ func CreateAWSEC2Instance() (string, error) {
 	// Run EC2 instance
 	runResult, err := svc.RunInstances(GetSampleSecurityGroupInput())
 	if err != nil {
-		log.Println("Could not create instance", err)
+		util.CoriPrintln("Failed to create instance", err)
 		return "", err
 	}
 	instanceID := *runResult.Instances[0].InstanceId
-	util.CoriPrintf("Created instance : %s \n", instanceID)
+	networkInterfaceId := *runResult.Instances[0].NetworkInterfaces[0].NetworkInterfaceId
+	util.CoriPrintf("Created instance : %s, network interface ID: %s \n", instanceID, networkInterfaceId)
 
+	err = ExampleEC2_ModifyNetworkInterfaceAttribute(svc, networkInterfaceId)
+	if err != nil {
+		util.CoriPrintf("Failed to modify network interface attribute", err)
+		return "", err
+	}
+	util.CoriPrintln("Successfully updated network interface: ", networkInterfaceId)
 	//ExampleEC2AssociateIamInstanceProfile(svc, instanceID)
 	return instanceID, nil
 
@@ -270,4 +279,35 @@ func ExampleEC2AssociateIamInstanceProfile(ec2Svc *ec2.EC2, instanceID string) e
 	util.CoriPrintln(result)
 	return nil
 
+}
+
+// To modify the sourceDestCheck attribute of a network interface
+//
+// This example command modifies the sourceDestCheck attribute of the specified network
+// interface.
+func ExampleEC2_ModifyNetworkInterfaceAttribute(ec2Svc *ec2.EC2, networkInterfaceId string) error {
+	//svc := ec2.New(session.New())
+	input := &ec2.ModifyNetworkInterfaceAttributeInput{
+		NetworkInterfaceId: aws.String(networkInterfaceId),
+		SourceDestCheck: &ec2.AttributeBooleanValue{
+			Value: aws.Bool(false),
+		},
+	}
+
+	result, err := ec2Svc.ModifyNetworkInterfaceAttribute(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			default:
+				util.CoriPrintln(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			util.CoriPrintln(err.Error())
+		}
+		return err
+	}
+	util.CoriPrintln(result)
+	return nil
 }
