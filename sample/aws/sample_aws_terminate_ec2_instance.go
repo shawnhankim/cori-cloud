@@ -19,10 +19,23 @@ package sample
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	coriAWS "github.com/shawnhankim/cori-cloud/pkg/aws"
 	util "github.com/shawnhankim/cori-cloud/pkg/util"
 )
 
+// TerminateInstance is the sample code to terminate EC2 instance on AWS
+func TerminateInstance(inst *CommonInstanceInfo) error {
+
+	// Display starting message
+	util.CoriPrintln("Start terminating a sample EC2 instance on AWS.")
+
+	// Release elastic IP
+	err := ReleaseElasticIP(inst.ec2Service, inst.elasticAllocationID)
+	// Terminate EC2 instnce on AWS
+	//return TerminateAWSEC2Instance(svc, *inst.instanceID)
+	return err
+}
+
+/*
 // TerminateInstance is the sample code to terminate EC2 instance on AWS
 func TerminateInstance(instanceID string) error {
 	// Display starting message
@@ -45,6 +58,7 @@ func TerminateInstance(instanceID string) error {
 	// Terminate EC2 instnce on AWS
 	return TerminateAWSEC2Instance(svc, instanceID)
 }
+*/
 
 // TerminateAWSEC2Instance terminates an EC2 instance on AWS
 func TerminateAWSEC2Instance(svc *ec2.EC2, instanceID string) error {
