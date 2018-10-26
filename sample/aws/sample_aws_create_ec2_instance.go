@@ -18,6 +18,7 @@ package sample
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -175,15 +176,15 @@ func GetSampleSecurityGroupInput() *ec2.RunInstancesInput {
 
 	return &ec2.RunInstancesInput{
 		IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
-			Name: aws.String("Shawn-1024-09pm-BlueInstanceIAMProfile-1KYJ91GRM5LVQ"),
+			Name: aws.String("Shawn-1025-BlueInstanceIAMProfile-696Z2E99TZGV"),
 		},
-		ImageId:      aws.String("ami-0bccdb3b05638f96a"),
+		ImageId:      aws.String("ami-0cf88cd96d9b08d38"),
 		InstanceType: aws.String("c4.large"),
 		KeyName:      aws.String("shawnkim-ssh"),
 		MinCount:     aws.Int64(1),
 		MaxCount:     aws.Int64(1),
 		SecurityGroupIds: []*string{
-			aws.String("sg-0d8f654e29342a47b"),
+			aws.String("sg-0551fcf43e7f4039f"),
 		},
 		SubnetId: aws.String("subnet-059d49181a476ccdb"),
 		TagSpecifications: []*ec2.TagSpecification{
@@ -234,9 +235,24 @@ func CreateAWSEC2Instance() (string, error) {
 		util.CoriPrintln("Failed to create instance", err)
 		return "", err
 	}
+
+	// Modify network interface attribute
 	instanceID := *runResult.Instances[0].InstanceId
 	networkInterfaceId := *runResult.Instances[0].NetworkInterfaces[0].NetworkInterfaceId
-	util.CoriPrintf("Created instance : %s, network interface ID: %s \n", instanceID, networkInterfaceId)
+	for i := 0; i < 10; i++ {
+		attachment := *runResult.Instances[0].NetworkInterfaces[0].Attachment
+		if attachment.Status == aws.String(ec2.AttachmentStatusAttached) {
+			break
+		}
+		time.Sleep(time.Second)
+	}
+
+	publicIP := ""
+	if nil != runResult.Instances[0].NetworkInterfaces[0].Association {
+		publicIP = *runResult.Instances[0].NetworkInterfaces[0].Association.PublicIp
+	}
+	util.CoriPrintf("Created instance : %s, network interface ID: %s, public IP : %s \n",
+		instanceID, networkInterfaceId, publicIP)
 
 	err = ExampleEC2_ModifyNetworkInterfaceAttribute(svc, networkInterfaceId)
 	if err != nil {
@@ -244,7 +260,17 @@ func CreateAWSEC2Instance() (string, error) {
 		return "", err
 	}
 	util.CoriPrintln("Successfully updated network interface: ", networkInterfaceId)
+	util.CoriPrintln("network interface: ", runResult.Instances[0].NetworkInterfaces)
+
+	// Create elastic IP
+	elasticIP, err := ExampleEC2_CreateElasticIP(svc, "", instanceID)
 	//ExampleEC2AssociateIamInstanceProfile(svc, instanceID)
+	if err != nil {
+		util.CoriPrintln("Failed to create elastic IP", err)
+		return "", err
+	}
+	util.CoriPrintln("Successfully created elasticIP: ", elasticIP)
+
 	return instanceID, nil
 
 }
@@ -286,7 +312,6 @@ func ExampleEC2AssociateIamInstanceProfile(ec2Svc *ec2.EC2, instanceID string) e
 // This example command modifies the sourceDestCheck attribute of the specified network
 // interface.
 func ExampleEC2_ModifyNetworkInterfaceAttribute(ec2Svc *ec2.EC2, networkInterfaceId string) error {
-	//svc := ec2.New(session.New())
 	input := &ec2.ModifyNetworkInterfaceAttributeInput{
 		NetworkInterfaceId: aws.String(networkInterfaceId),
 		SourceDestCheck: &ec2.AttributeBooleanValue{
@@ -310,4 +335,33 @@ func ExampleEC2_ModifyNetworkInterfaceAttribute(ec2Svc *ec2.EC2, networkInterfac
 	}
 	util.CoriPrintln(result)
 	return nil
+}
+
+func ExampleEC2_CreateElasticIP(ec2Svc *ec2.EC2, publicIP, instanceID string) (string, error) {
+	// Attempt to allocate the Elastic IP address.
+	allocRes, err := ec2Svc.AllocateAddress(&ec2.AllocateAddressInput{
+		PublicIpv4Pool: aws.String(publicIP),
+		Domain:         aws.String("vpc"),
+	})
+	if err != nil {
+		util.CoriPrintln("Unable to allocate IP address", err)
+		return "", err
+	}
+	util.CoriPrintln("Allocated IP address", allocRes)
+
+	// Associate the new Elastic IP address with an existing EC2 instance.
+	assocRes, err := ec2Svc.AssociateAddress(&ec2.AssociateAddressInput{
+		AllocationId: allocRes.AllocationId,
+		InstanceId:   aws.String(instanceID),
+	})
+	if err != nil {
+		util.CoriPrintf("Unable to associate IP address with %s, %v\n",
+			instanceID, err)
+		return "", err
+	}
+
+	util.CoriPrintf("Successfully allocated %s with instance %s.\n\tallocation id: %s, association id: %s\n",
+		*allocRes.PublicIp, instanceID, *allocRes.AllocationId, *assocRes.AssociationId)
+	elasticIP := *allocRes.PublicIp
+	return elasticIP, nil
 }
