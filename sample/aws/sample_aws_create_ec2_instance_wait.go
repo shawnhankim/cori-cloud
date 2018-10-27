@@ -52,10 +52,6 @@ func CreateAWSEC2InstanceWitWaitInstanceExists() (*CommonInstanceInfo, error) {
 	util.CoriPrintln("Start creating a sample EC2 instance on AWS.")
 	util.CoriPrintln("- ", new(big.Int).Binomial(1000, 10))
 
-	// Declare sample variables
-	sampleRegion := "us-west-2"
-	sampleProfile := "my-account"
-
 	// Create session
 	sess, err := coriAWS.CreateSession(sampleRegion, sampleProfile)
 	if err != nil {
@@ -64,11 +60,11 @@ func CreateAWSEC2InstanceWitWaitInstanceExists() (*CommonInstanceInfo, error) {
 	}
 
 	// Create EC2 instance session
-	svc := ec2.New(sess)
+	ret.ec2Service = ec2.New(sess)
 
 	// Run EC2 instance
 	input := GetSampleSecurityGroupInput()
-	runResult, err := svc.RunInstances(input)
+	runResult, err := ret.ec2Service.RunInstances(input)
 	if err != nil {
 		util.CoriPrintln("Failed to create instance", err)
 		return nil, err
@@ -82,7 +78,7 @@ func CreateAWSEC2InstanceWitWaitInstanceExists() (*CommonInstanceInfo, error) {
 	util.CoriPrintf("Created instance: ID(%s), network ID(%s) \n", *ret.instanceID, *ret.networkInterfaceID)
 
 	// Modify network interface attribute : SourceDestCheck(False)
-	err = ExampleEC2_ModifyNetworkInterfaceAttribute(svc, *ret.networkInterfaceID)
+	err = ExampleEC2_ModifyNetworkInterfaceAttribute(ret.ec2Service, *ret.networkInterfaceID)
 	if err != nil {
 		util.CoriPrintf("Failed to modify network interface attribute", err)
 		return ret, err
@@ -106,7 +102,7 @@ func CreateAWSEC2InstanceWitWaitInstanceExists() (*CommonInstanceInfo, error) {
 
 	// Wait whether all of network interfaces are attached to find public IP
 	util.CoriPrintln("Waiting for all network interfaces to be attached to find public IP...")
-	networkAttachedStatusErr := svc.WaitUntilInstanceExists(&statusInput)
+	networkAttachedStatusErr := ret.ec2Service.WaitUntilInstanceExists(&statusInput)
 	if networkAttachedStatusErr != nil {
 		util.CoriPrintln("Failed to wait until instances exist: %v", networkAttachedStatusErr)
 		return nil, networkAttachedStatusErr
@@ -119,7 +115,7 @@ func CreateAWSEC2InstanceWitWaitInstanceExists() (*CommonInstanceInfo, error) {
 			ret.instanceID,
 		},
 	}
-	result, err := svc.DescribeInstances(&statusInput)
+	result, err := ret.ec2Service.DescribeInstances(&statusInput)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
@@ -140,7 +136,7 @@ func CreateAWSEC2InstanceWitWaitInstanceExists() (*CommonInstanceInfo, error) {
 	util.CoriPrintln("Found public IP: ", *ret.publicIP)
 
 	// Create elastic IP
-	ret.elasticIP, ret.elasticAllocationID, err = ExampleEC2_AllocateAddress(svc, *ret.instanceID, *ret.publicIP)
+	ret.elasticIP, ret.elasticAllocationID, err = ExampleEC2_AllocateAddress(ret.ec2Service, *ret.instanceID, *ret.publicIP)
 	if err != nil {
 		util.CoriPrintln("Failed to create elastic IP", err)
 		return ret, err
@@ -148,7 +144,7 @@ func CreateAWSEC2InstanceWitWaitInstanceExists() (*CommonInstanceInfo, error) {
 	util.CoriPrintln("Successfully created elasticIP: ", *ret.elasticIP)
 
 	// Associate elastic IP to instance
-	_, err = ExampleEC2_AssociateAddress(svc, *ret.instanceID, *ret.elasticIP)
+	_, err = ExampleEC2_AssociateAddress(ret.ec2Service, *ret.instanceID, *ret.elasticIP)
 	if err != nil {
 		util.CoriPrintf("Failed to assotiated elasticIP (%s) to instance (%s), %v \n", *ret.elasticIP, *ret.instanceID, err)
 		return ret, err
