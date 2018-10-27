@@ -32,3 +32,9 @@ type CommonInstanceInfo struct {
 	elasticAllocationID *string
 	publicIP            *string
 }
+
+var (
+	sampleKeyID   = "shawnkim-ssh"
+	sampleRegion  = "us-west-2"
+	sampleProfile = "my-account"
+)

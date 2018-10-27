@@ -116,7 +116,7 @@ func ReleaseElasticIP(svc *ec2.EC2, allocationID *string) error {
 			util.CoriPrintln("Allocation ID %s does not exist", allocationID)
 		}
 		util.CoriPrintf("Unable to release IP address for allocation %s, %v",
-			allocationID, err)
+			*allocationID, err)
 		return err
 	}
 

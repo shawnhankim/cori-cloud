@@ -36,8 +36,8 @@
     "service/iam",
     "service/sts"
   ]
-  revision = "9a79cc876234949427d966249a09fc98e7864bde"
-  version = "v1.15.61"
+  revision = "f76d9803fd695eebf74cb23c460287fa496efc21"
+  version = "v1.15.63"
 
 [[projects]]
   name = "github.com/jmespath/go-jmespath"
