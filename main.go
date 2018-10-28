@@ -36,35 +36,19 @@ func main() {
 	// sampleAWS.CreateAWSRole()
 
 	// Sample Code : create an EC2 instance on AWS
-	// _, err := sampleAWS.CreateAWSEC2InstanceWitWaitInstanceExists()
+	ret, err := sampleAWS.CreateAWSEC2InstanceWitWaitInstanceExists()
+	if err == nil {
+		sampleAWS.DisplayCommonInstanceInfo(ret)
+	}
 
 	// Sample Code : connect ssh to EC2 instance on AWS
 	// SampleAWS.ExampleSSH()
 
 	// Sample Code : Get common instance information on AWS
-	inst, err := sampleAWS.GetCommonInstance()
+	// inst, err := sampleAWS.GetCommonInstance()
 
 	// Sample Code : terminate instance on AWS
-	if err == nil {
-		sampleAWS.TerminateInstance(inst)
-	}
-	// Sample
-	//_, err := sampleAWS.CreateAWSEC2InstanceWitWaitInstanceExists()
 	//if err == nil {
-	//ret, err := sampleAWS.DescribeInstances(aws.String("Shawn-sample"))
-	//if err == nil {
-	//	util.CoriPrintln("Return : ", *ret)
+	//sampleAWS.TerminateInstance(inst)
 	//}
-	//	sampleAWS.ExampleExecCmd(ret)
-	//util.CoriPrintln("Waiting 60 seconds to terminate instance")
-	//time.Sleep(60 * time.Second)
-	//sampleAWS.TerminateInstance(ret)
-	//util.CoriPrintln("Terminated instance")
-	//}
-	//sampleAWS.CreateAWSEC2Instance()
-	//sampleAWS.ExampleEC2CreateLaunchTemplate()
-
-	// Sample Code : terminate an EC2 instance on AWS
-	//sampleAWS.TerminateInstance("i-0ff22d13ab2c30744")
-
 }
