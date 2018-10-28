@@ -39,16 +39,21 @@ func main() {
 	// Sample Code : create an EC2 instance on AWS
 	//SampleAWS.ExampleSSH()
 
-	_, err := sampleAWS.CreateAWSEC2InstanceWitWaitInstanceExists()
-	if err == nil {
-		sampleAWS.DescribeInstances()
+	// Sample Code : Get common instance information on AWS
+	sampleAWS.GetCommonInstance()
 
-		//	sampleAWS.ExampleExecCmd(ret)
-		//util.CoriPrintln("Waiting 60 seconds to terminate instance")
-		//time.Sleep(60 * time.Second)
-		//sampleAWS.TerminateInstance(ret)
-		//util.CoriPrintln("Terminated instance")
-	}
+	//_, err := sampleAWS.CreateAWSEC2InstanceWitWaitInstanceExists()
+	//if err == nil {
+	//ret, err := sampleAWS.DescribeInstances(aws.String("Shawn-sample"))
+	//if err == nil {
+	//	util.CoriPrintln("Return : ", *ret)
+	//}
+	//	sampleAWS.ExampleExecCmd(ret)
+	//util.CoriPrintln("Waiting 60 seconds to terminate instance")
+	//time.Sleep(60 * time.Second)
+	//sampleAWS.TerminateInstance(ret)
+	//util.CoriPrintln("Terminated instance")
+	//}
 	//sampleAWS.CreateAWSEC2Instance()
 	//sampleAWS.ExampleEC2CreateLaunchTemplate()
 

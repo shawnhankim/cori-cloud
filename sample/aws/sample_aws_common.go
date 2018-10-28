@@ -37,4 +37,5 @@ var (
 	sampleKeyID   = "shawnkim-ssh"
 	sampleRegion  = "us-west-2"
 	sampleProfile = "my-account"
+	sampleName    = "Shawn-sample"
 )
