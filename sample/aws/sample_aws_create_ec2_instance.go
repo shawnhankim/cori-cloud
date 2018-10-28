@@ -193,7 +193,7 @@ func GetSampleSecurityGroupInput() *ec2.RunInstancesInput {
 				Tags: []*ec2.Tag{
 					{
 						Key:   aws.String("Name"),
-						Value: aws.String("Shawn-sample")},
+						Value: aws.String(sampleName)},
 					{
 						Key:   aws.String("AutoPrune"),
 						Value: aws.String("False")},
