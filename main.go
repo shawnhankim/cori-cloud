@@ -17,15 +17,14 @@
 package main
 
 import (
-	"fmt"
-
+	"github.com/shawnhankim/cori-cloud/pkg/util"
 	sampleAWS "github.com/shawnhankim/cori-cloud/sample/aws"
 )
 
 func main() {
 
 	// Display title of cori-cloud
-	fmt.Printf("* This is the cori-cloud.\n")
+	util.CoriPrintln("* This is the cori-cloud.")
 
 	// Sample Code : create an instance on AWS
 	// sampleAWS.CreateAWSInstance()

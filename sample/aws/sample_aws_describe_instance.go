@@ -19,6 +19,7 @@ package sample
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -64,16 +65,23 @@ func DescribeInstances(svc *ec2.EC2, instanceName *string) (*ec2.DescribeInstanc
 
 func GetCommonInstance() {
 
+	start := time.Now()
+
 	// Create session
 	sess, err := coriAWS.CreateSession(sampleRegion, sampleProfile)
 	if err != nil {
 		util.CoriPrintln("Failed to create session", err)
 		return
 	}
+	elapsed := time.Since(start)
+	util.CoriPrintf("Elapsed time (Create Session) : %s\n", elapsed)
 
 	// Create EC2 instance session
 	svc := ec2.New(sess)
 	GetCommonInstanceInfo(svc, aws.String(sampleName))
+
+	elapsed = time.Since(start)
+	util.CoriPrintf("Elapsed time (Get Information) : %s\n", elapsed)
 }
 
 func GetCommonInstanceInfo(svc *ec2.EC2, instanceName *string) (*CommonInstanceInfo, error) {
@@ -135,7 +143,7 @@ func GetElasticAssociationID(svc *ec2.EC2, elasticIP *string) (*string, error) {
 		return nil, errors.New(err)
 	}
 	allocationID := result.Addresses[0].AllocationId
-	util.CoriPrintln("Elastic association ID", allocationID)
+	util.CoriPrintln("Elastic association ID", *allocationID)
 	return allocationID, nil
 }
 
