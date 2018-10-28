@@ -22,48 +22,77 @@ import (
 	"io/ioutil"
 	"os"
 
-	"golang.org/x/crypto/ssh"
-
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
+	util "github.com/shawnhankim/cori-cloud/pkg/util"
+	"golang.org/x/crypto/ssh"
 )
 
-func execCmd(inst *ec2.Instance, cmd string) (*string, error) {
+func ExampleExecCmd(inst *CommonInstanceInfo) {
+	res, err := ExecCmd(*inst.elasticIP, "ls -l /")
+	//res, err := ExecCmd("54.191.245.224", "ls -l /") //whoami")
+	if err != nil {
+		util.CoriPrintln("Failed to connect ssh", res, err)
+	} else {
+		util.CoriPrintln("Succeed to connect ssh", res)
+	}
+}
+
+func ExampleSSH() {
+	res, err := ExecCmd("52.41.115.59", "ls -l /") //whoami")
+	if err != nil {
+		util.CoriPrintln("Failed to connect ssh", *res, err)
+	} else {
+		util.CoriPrintln("Succeed to connect ssh", *res)
+	}
+}
+
+func ExecCmd(publicIP, cmd string) (*string, error) {
+
 	// Open PEM file
 	pemPath := os.Getenv("PEM_PATH")
 	pemBytes, err := ioutil.ReadFile(pemPath)
 	if err != nil {
+		util.CoriPrintln("Unable to open PEM file.", pemPath, "error: ", err)
 		return nil, err
 	}
 
 	// Obtain private key
 	signer, err := ssh.ParsePrivateKey(pemBytes)
 	if err != nil {
+		util.CoriPrintln("Unable to open private key.", signer, "error: ", err)
 		return nil, err
 	}
 
 	// Connect to the remote server and perform the SSH handshake
 	config := &ssh.ClientConfig{
-		User: "ubuntu",
+		User: "centos",
 		Auth: []ssh.AuthMethod{ssh.PublicKeys(signer)},
 	}
-	addr := fmt.Sprintf("%s:%d", *inst.PublicIpAddress, 22)
+	config.HostKeyCallback = ssh.InsecureIgnoreHostKey()
+
+	addr := fmt.Sprintf("%s:22", publicIP)
 	conn, err := ssh.Dial("tcp", addr, config)
 	if err != nil {
+		util.CoriPrintln("Unable to dial to", addr, "error: ", err)
 		return nil, err
 	}
+	util.CoriPrintln("Succeed to dial to", addr)
 	defer conn.Close()
 
 	session, err := conn.NewSession()
 	if err != nil {
+		util.CoriPrintln("Unable to create session: ", err)
 		return nil, err
 	}
+	util.CoriPrintln("Succeed to create session")
 
 	defer session.Close()
 	var stdoutBuf bytes.Buffer
 	session.Stdout = &stdoutBuf
 	err = session.Run(cmd)
-	check(err)
-
+	if err != nil {
+		util.CoriPrintln("Unable to get return value: ", err)
+		return nil, err
+	}
 	return aws.String(stdoutBuf.String()), nil
 }

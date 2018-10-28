@@ -176,15 +176,15 @@ func GetSampleSecurityGroupInput() *ec2.RunInstancesInput {
 
 	return &ec2.RunInstancesInput{
 		IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
-			Name: aws.String("Shawn-1025-BlueInstanceIAMProfile-696Z2E99TZGV"),
+			Name: aws.String("Shawn-1026-BlueInstanceIAMProfile-17O04564LVYNC"),
 		},
-		ImageId:      aws.String("ami-0cf88cd96d9b08d38"),
+		ImageId:      aws.String("ami-093319018ab016717"),
 		InstanceType: aws.String("c4.large"),
 		KeyName:      aws.String("shawnkim-ssh"),
 		MinCount:     aws.Int64(1),
 		MaxCount:     aws.Int64(1),
 		SecurityGroupIds: []*string{
-			aws.String("sg-0551fcf43e7f4039f"),
+			aws.String("sg-0cda0a36731a2c347"),
 		},
 		SubnetId: aws.String("subnet-059d49181a476ccdb"),
 		TagSpecifications: []*ec2.TagSpecification{
