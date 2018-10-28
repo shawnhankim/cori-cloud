@@ -34,26 +34,26 @@ func TerminateInstance(inst *CommonInstanceInfo) error {
 	// Deassociate elastic IP
 	err := DisassociateAddress(inst.ec2Service, inst.elasticIP)
 	if err != nil {
-		util.CoriPrintln("Failed to deassociate instance", *inst.elasticIP, err)
-		return err
+		util.CoriPrintln("Unable to deassociate instance since elastic IP has been already deassociated", err)
+	} else {
+		util.CoriPrintln("Complated to deassociate instance", *inst.elasticIP, err)
 	}
-	util.CoriPrintln("Complated to deassociate instance", *inst.elasticIP, err)
 
 	// Release elastic IP
 	err = ReleaseElasticIP(inst.ec2Service, inst.elasticAllocationID)
 	if err != nil {
-		util.CoriPrintln("Failed to release elastic IP", *inst.elasticIP, err)
-		return err
+		util.CoriPrintln("Unable to deassociate instance since elastic IP has been already released", err)
+	} else {
+		util.CoriPrintln("Completed to release elastic IP", *inst.elasticIP)
 	}
-	util.CoriPrintln("Completed to release elastic IP", *inst.elasticIP)
 
 	// Terminate EC2 instnce on AWS
-	//return TerminateAWSEC2Instance(svc, *inst.instanceID)
+	err = TerminateAWSEC2Instance(inst.ec2Service, *inst.instanceID)
 
 	// Display elapsed time
 	elapsed := time.Since(start)
 	util.CoriPrintf("Elapsed time (Get Information) : %s\n", elapsed)
-	return nil
+	return err
 }
 
 /*
