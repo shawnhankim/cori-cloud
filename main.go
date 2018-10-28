@@ -36,11 +36,19 @@ func main() {
 	// sampleAWS.CreateAWSRole()
 
 	// Sample Code : create an EC2 instance on AWS
-	//SampleAWS.ExampleSSH()
+	// _, err := sampleAWS.CreateAWSEC2InstanceWitWaitInstanceExists()
+
+	// Sample Code : connect ssh to EC2 instance on AWS
+	// SampleAWS.ExampleSSH()
 
 	// Sample Code : Get common instance information on AWS
-	sampleAWS.GetCommonInstance()
+	inst, err := sampleAWS.GetCommonInstance()
 
+	// Sample Code : terminate instance on AWS
+	if err == nil {
+		sampleAWS.TerminateInstance(inst)
+	}
+	// Sample
 	//_, err := sampleAWS.CreateAWSEC2InstanceWitWaitInstanceExists()
 	//if err == nil {
 	//ret, err := sampleAWS.DescribeInstances(aws.String("Shawn-sample"))

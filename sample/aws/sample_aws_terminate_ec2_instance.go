@@ -17,6 +17,8 @@
 package sample
 
 import (
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	util "github.com/shawnhankim/cori-cloud/pkg/util"
@@ -26,13 +28,32 @@ import (
 func TerminateInstance(inst *CommonInstanceInfo) error {
 
 	// Display starting message
+	start := time.Now()
 	util.CoriPrintln("Start terminating a sample EC2 instance on AWS.")
 
+	// Deassociate elastic IP
+	err := DisassociateAddress(inst.ec2Service, inst.elasticIP)
+	if err != nil {
+		util.CoriPrintln("Failed to deassociate instance", *inst.elasticIP, err)
+		return err
+	}
+	util.CoriPrintln("Complated to deassociate instance", *inst.elasticIP, err)
+
 	// Release elastic IP
-	err := ReleaseElasticIP(inst.ec2Service, inst.elasticAllocationID)
+	err = ReleaseElasticIP(inst.ec2Service, inst.elasticAllocationID)
+	if err != nil {
+		util.CoriPrintln("Failed to release elastic IP", *inst.elasticIP, err)
+		return err
+	}
+	util.CoriPrintln("Completed to release elastic IP", *inst.elasticIP)
+
 	// Terminate EC2 instnce on AWS
 	//return TerminateAWSEC2Instance(svc, *inst.instanceID)
-	return err
+
+	// Display elapsed time
+	elapsed := time.Since(start)
+	util.CoriPrintf("Elapsed time (Get Information) : %s\n", elapsed)
+	return nil
 }
 
 /*
