@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	util "github.com/shawnhankim/cori-cloud/pkg/util"
 )
@@ -111,6 +112,28 @@ func TerminateAWSEC2Instance(svc *ec2.EC2, instanceID *string) error {
 		util.CoriPrintln("Failed to wait until instance is terminated: %v", instanceStateRet)
 		return instanceStateRet
 	}
+
+	// Get the latest EC2 instance information
+	statusInput = ec2.DescribeInstancesInput{
+		InstanceIds: []*string{
+			instanceID,
+		},
+	}
+	result, err := svc.DescribeInstances(&statusInput)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			default:
+				util.CoriPrintln(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			util.CoriPrintln(err.Error())
+		}
+		return err
+	}
+	util.CoriPrintf("The terminated instance information : %+v \n", result)
 	util.CoriPrintln("The instance is terminated")
 
 	return nil
