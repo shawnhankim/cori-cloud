@@ -17,6 +17,7 @@
 package sample
 
 import (
+	"errors"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -48,7 +49,7 @@ func TerminateInstance(inst *CommonInstanceInfo) error {
 	}
 
 	// Terminate EC2 instnce on AWS
-	err = TerminateAWSEC2Instance(inst.ec2Service, *inst.instanceID)
+	err = TerminateAWSEC2Instance(inst.ec2Service, inst.instanceID)
 
 	// Display elapsed time
 	elapsed := time.Since(start)
@@ -56,115 +57,61 @@ func TerminateInstance(inst *CommonInstanceInfo) error {
 	return err
 }
 
-/*
-// TerminateInstance is the sample code to terminate EC2 instance on AWS
-func TerminateInstance(instanceID string) error {
-	// Display starting message
-	util.CoriPrintln("Start terminating a sample EC2 instance on AWS.")
-
-	// Declare sample variables
-	sampleRegion := "us-west-2"
-	sampleProfile := "my-account"
-
-	// Create session
-	sess, err := coriAWS.CreateSession(sampleRegion, sampleProfile)
-	if err != nil {
-		util.CoriPrintf("Failed to create session : %v\n", err)
-		return err
-	}
-
-	// Create EC2 instance session
-	svc := ec2.New(sess)
-
-	// Terminate EC2 instnce on AWS
-	return TerminateAWSEC2Instance(svc, instanceID)
-}
-*/
-
 // TerminateAWSEC2Instance terminates an EC2 instance on AWS
-func TerminateAWSEC2Instance(svc *ec2.EC2, instanceID string) error {
+func TerminateAWSEC2Instance(svc *ec2.EC2, instanceID *string) error {
+
+	// Check parameter
+	if instanceID == nil {
+		msg := "There is no instance to be terminated"
+		util.CoriPrintln(msg)
+		return errors.New(msg)
+	}
 
 	// Get input parameter to be terminated
 	params := &ec2.TerminateInstancesInput{
 		InstanceIds: []*string{
-			aws.String(instanceID),
+			instanceID,
 		},
 	}
 
 	// Germinate EC2 instance on AWS
 	resp, err := svc.TerminateInstances(params)
 	if err != nil {
-		util.CoriPrintf("Failed to terminate instance : %s, error : %v", instanceID, err)
+		util.CoriPrintf("Failed to terminate instance : %s, error : %v", *instanceID, err)
 	} else {
-		util.CoriPrintf("Successfully terminated instance : %s, %v", instanceID, resp)
-	}
-	return err
-}
-
-/*
-// TerminateAWSEC2Instance terminates an EC2 instance on AWS
-func TerminateAWSEC2Instance(instanceId string) error {
-
-	// Display starting message
-	util.CoriPrintln("Start terminating a sample EC2 instance on AWS.")
-
-	// Declare sample variables
-	sampleRegion := "us-west-2"
-	sampleProfile := "my-account"
-
-	// Create session
-	sess, err := coriAWS.CreateSession(sampleRegion, sampleProfile)
-	if err != nil {
-		util.CoriPrintf("Failed to create session : %v\n", err)
-		return err
+		util.CoriPrintf("Successfully terminated instance : %s, %v", *instanceID, resp)
 	}
 
-	// Create EC2 instance
-	svc := ec2.New(sess)
-
-	input := &ec2.TerminateInstancesInput{
+	// Check whether instance state is terminated on AWS
+	//    * instance-state-code - The state of the instance, as a 16-bit unsigned
+	//    integer. The high byte is used for internal purposes and should be ignored.
+	//    The low byte is set based on the state represented. The valid values are:
+	//    0 (pending), 16 (running), 32 (shutting-down), 48 (terminated), 64 (stopping),
+	//    and 80 (stopped).
+	//
+	//    * instance-state-name - The state of the instance (pending | running |
+	//    shutting-down | terminated | stopping | stopped).
+	statusInput := ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
-			aws.String(instanceId),
+			instanceID,
 		},
-		DryRun: aws.Bool(true),
-	}
-
-	// Run EC2 instance
-	runResult, err := svc.RunInstances(input)
-
-	if err != nil {
-		log.Printf("Could not terminate instance : %s, error : %v", instanceID, err)
-		return err
-	}
-
-	log.Println("Created instance", *runResult.Instances[0].InstanceId)
-
-	// Add tags to the created instance
-	_, errtag := svc.CreateTags(&ec2.CreateTagsInput{
-		Resources: []*string{runResult.Instances[0].InstanceId},
-		Tags: []*ec2.Tag{
+		Filters: []*ec2.Filter{
 			{
-				Key:   aws.String("Name"),
-				Value: aws.String("Cori-instance"),
-			},
-			{
-				Key:   aws.String("AutoPrune"),
-				Value: aws.String("False"),
-			},
-			{
-				Key:   aws.String("Owner"),
-				Value: aws.String("Shawn"),
+				Name: aws.String("instance-state-code"),
+				Values: []*string{
+					aws.String("48"), // 0 (pending), 16 (running), 32 (shutting-down), 48 (terminated), 64 (stopping), 80 (stopped).
+				},
 			},
 		},
-	})
-	if errtag != nil {
-		log.Println("Could not create tags for instance", runResult.Instances[0].InstanceId, errtag)
-		return err
 	}
 
-	log.Println("Successfully tagged instance")
+	util.CoriPrintln("Waiting for the instance to be terminated...")
+	instanceStateRet := svc.WaitUntilInstanceTerminated(&statusInput)
+	if instanceStateRet != nil {
+		util.CoriPrintln("Failed to wait until instance is terminated: %v", instanceStateRet)
+		return instanceStateRet
+	}
+	util.CoriPrintln("The instance is terminated")
+
 	return nil
-
 }
-
-*/

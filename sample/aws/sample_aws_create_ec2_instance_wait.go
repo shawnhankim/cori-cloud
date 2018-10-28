@@ -45,7 +45,7 @@ func InitCommonInstanceInfo() *CommonInstanceInfo {
 // CreateAWSEC2Instance creates an EC2 instance on AWS and wait until instances exists
 func CreateAWSEC2InstanceWitWaitInstanceExists() (*CommonInstanceInfo, error) {
 
-	ret := InitCommonInstanceInfo()
+	output := InitCommonInstanceInfo()
 
 	// Display starting message
 	start := time.Now()
@@ -60,35 +60,33 @@ func CreateAWSEC2InstanceWitWaitInstanceExists() (*CommonInstanceInfo, error) {
 	}
 
 	// Create EC2 instance session
-	ret.ec2Service = ec2.New(sess)
+	output.ec2Service = ec2.New(sess)
 
 	// Run EC2 instance
 	input := GetSampleSecurityGroupInput()
-	runResult, err := ret.ec2Service.RunInstances(input)
+	runResult, err := output.ec2Service.RunInstances(input)
 	if err != nil {
 		util.CoriPrintln("Failed to create instance", err)
 		return nil, err
 	}
 
 	// Get instance ID and network interface ID
-	ret.instanceID = runResult.Instances[0].InstanceId
-	ret.networkInterfaceID = runResult.Instances[0].NetworkInterfaces[0].NetworkInterfaceId
-	//instanceID := *runResult.Instances[0].InstanceId
-	//networkInterfaceID := *runResult.Instances[0].NetworkInterfaces[0].NetworkInterfaceId
-	util.CoriPrintf("Created instance: ID(%s), network ID(%s) \n", *ret.instanceID, *ret.networkInterfaceID)
+	output.instanceID = runResult.Instances[0].InstanceId
+	output.networkInterfaceID = runResult.Instances[0].NetworkInterfaces[0].NetworkInterfaceId
+	util.CoriPrintf("Created instance: ID(%s), network ID(%s) \n", *output.instanceID, *output.networkInterfaceID)
 
 	// Modify network interface attribute : SourceDestCheck(False)
-	err = ExampleEC2_ModifyNetworkInterfaceAttribute(ret.ec2Service, *ret.networkInterfaceID)
+	err = ExampleEC2_ModifyNetworkInterfaceAttribute(output.ec2Service, *output.networkInterfaceID)
 	if err != nil {
 		util.CoriPrintf("Failed to modify network interface attribute", err)
-		return ret, err
+		return output, err
 	}
 	util.CoriPrintln("Updated network interface: ", runResult.Instances[0].NetworkInterfaces)
 
 	// Check whether public IP is created in the instance on AWS
 	statusInput := ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
-			ret.instanceID,
+			output.instanceID,
 		},
 		Filters: []*ec2.Filter{
 			{
@@ -102,7 +100,7 @@ func CreateAWSEC2InstanceWitWaitInstanceExists() (*CommonInstanceInfo, error) {
 
 	// Wait whether all of network interfaces are attached to find public IP
 	util.CoriPrintln("Waiting for all network interfaces to be attached to find public IP...")
-	networkAttachedStatusErr := ret.ec2Service.WaitUntilInstanceExists(&statusInput)
+	networkAttachedStatusErr := output.ec2Service.WaitUntilInstanceExists(&statusInput)
 	if networkAttachedStatusErr != nil {
 		util.CoriPrintln("Failed to wait until instances exist: %v", networkAttachedStatusErr)
 		return nil, networkAttachedStatusErr
@@ -112,10 +110,10 @@ func CreateAWSEC2InstanceWitWaitInstanceExists() (*CommonInstanceInfo, error) {
 	// Get the latest EC2 instance information
 	statusInput = ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
-			ret.instanceID,
+			output.instanceID,
 		},
 	}
-	result, err := ret.ec2Service.DescribeInstances(&statusInput)
+	result, err := output.ec2Service.DescribeInstances(&statusInput)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
@@ -127,36 +125,50 @@ func CreateAWSEC2InstanceWitWaitInstanceExists() (*CommonInstanceInfo, error) {
 			// Message from an error.
 			util.CoriPrintln(err.Error())
 		}
-		return ret, err
+		return output, err
 	}
 
-	// Display public IP
-	ret.publicIP = result.Reservations[0].Instances[0].PublicIpAddress
-	//publicIP := *result.Reservations[0].Instances[0].PublicIpAddress
-	util.CoriPrintln("Found public IP: ", *ret.publicIP)
+	// Set instance name
+	for _, inst := range result.Reservations[0].Instances {
+		if *inst.State.Code == 16 { // "running"
+			for _, tag := range inst.Tags {
+				if *tag.Key == "Name" {
+					output.instanceName = tag.Value
+					break
+				}
+			}
+			output.isInstanceCreated = true
+			output.isNetworkCreated = true
+			break
+		}
+	}
+
+	// Set and display public IP
+	output.publicIP = result.Reservations[0].Instances[0].PublicIpAddress
+	util.CoriPrintln("Found public IP: ", *output.publicIP)
 
 	// Create elastic IP
-	ret.elasticIP, ret.elasticAllocationID, err = ExampleEC2_AllocateAddress(ret.ec2Service, *ret.instanceID, *ret.publicIP)
+	output.elasticIP, output.elasticAllocationID, err = ExampleEC2_AllocateAddress(output.ec2Service, *output.instanceID, *output.publicIP)
 	if err != nil {
 		util.CoriPrintln("Failed to create elastic IP", err)
-		return ret, err
+		return output, err
 	}
-	util.CoriPrintln("Successfully created elasticIP: ", *ret.elasticIP)
+	util.CoriPrintln("Successfully created elasticIP: ", *output.elasticIP)
 
 	// Associate elastic IP to instance
-	_, err = ExampleEC2_AssociateAddress(ret.ec2Service, *ret.instanceID, *ret.elasticIP)
+	_, err = ExampleEC2_AssociateAddress(output.ec2Service, *output.instanceID, *output.elasticIP)
 	if err != nil {
-		util.CoriPrintf("Failed to assotiated elasticIP (%s) to instance (%s), %v \n", *ret.elasticIP, *ret.instanceID, err)
-		return ret, err
+		util.CoriPrintf("Failed to assotiated elasticIP (%s) to instance (%s), %v \n", *output.elasticIP, *output.instanceID, err)
+		return output, err
 	}
 	//result.Reservations[0].
-	util.CoriPrintf("Successfully assotiated elasticIP (%s) to instance (%s) \n", *ret.elasticIP, *ret.instanceID)
+	util.CoriPrintf("Successfully assotiated elasticIP (%s) to instance (%s) \n", *output.elasticIP, *output.instanceID)
 
 	// Display elapsed time
 	elapsed := time.Since(start)
 	util.CoriPrintf("Elapsed time : %s\n", elapsed)
 
-	return ret, nil
+	return output, nil
 
 }
 func fmtAddress(addr *ec2.Address) string {
