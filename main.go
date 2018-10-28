@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 
-	SampleAWS "github.com/shawnhankim/cori-cloud/sample/aws"
+	sampleAWS "github.com/shawnhankim/cori-cloud/sample/aws"
 )
 
 func main() {
@@ -37,16 +37,18 @@ func main() {
 	// sampleAWS.CreateAWSRole()
 
 	// Sample Code : create an EC2 instance on AWS
-	SampleAWS.ExampleSSH()
+	//SampleAWS.ExampleSSH()
 
-	//ret, err := sampleAWS.CreateAWSEC2InstanceWitWaitInstanceExists()
-	//if err == nil {
-	//sampleAWS.ExampleExecCmd(ret)
-	//util.CoriPrintln("Waiting 60 seconds to terminate instance")
-	//time.Sleep(60 * time.Second)
-	//sampleAWS.TerminateInstance(ret)
-	//util.CoriPrintln("Terminated instance")
-	//}
+	_, err := sampleAWS.CreateAWSEC2InstanceWitWaitInstanceExists()
+	if err == nil {
+		sampleAWS.DescribeInstances()
+
+		//	sampleAWS.ExampleExecCmd(ret)
+		//util.CoriPrintln("Waiting 60 seconds to terminate instance")
+		//time.Sleep(60 * time.Second)
+		//sampleAWS.TerminateInstance(ret)
+		//util.CoriPrintln("Terminated instance")
+	}
 	//sampleAWS.CreateAWSEC2Instance()
 	//sampleAWS.ExampleEC2CreateLaunchTemplate()
 
