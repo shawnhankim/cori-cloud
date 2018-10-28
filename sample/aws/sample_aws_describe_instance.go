@@ -63,7 +63,7 @@ func DescribeInstances(svc *ec2.EC2, instanceName *string) (*ec2.DescribeInstanc
 	return output, nil
 }
 
-func GetCommonInstance() {
+func GetCommonInstance() (*CommonInstanceInfo, error) {
 
 	start := time.Now()
 
@@ -71,17 +71,22 @@ func GetCommonInstance() {
 	sess, err := coriAWS.CreateSession(sampleRegion, sampleProfile)
 	if err != nil {
 		util.CoriPrintln("Failed to create session", err)
-		return
+		return nil, err
 	}
 	elapsed := time.Since(start)
 	util.CoriPrintf("Elapsed time (Create Session) : %s\n", elapsed)
 
 	// Create EC2 instance session
 	svc := ec2.New(sess)
-	GetCommonInstanceInfo(svc, aws.String(sampleName))
+	ret, err := GetCommonInstanceInfo(svc, aws.String(sampleName))
+	if err == nil {
+		ret.ec2Service = svc
+	}
 
 	elapsed = time.Since(start)
 	util.CoriPrintf("Elapsed time (Get Information) : %s\n", elapsed)
+
+	return ret, err
 }
 
 func GetCommonInstanceInfo(svc *ec2.EC2, instanceName *string) (*CommonInstanceInfo, error) {
@@ -115,6 +120,9 @@ func GetCommonInstanceInfo(svc *ec2.EC2, instanceName *string) (*CommonInstanceI
 
 	// Describe elastic IP
 	output.elasticAllocationID, err = GetElasticAssociationID(svc, output.elasticIP)
+	if err != nil {
+		output.elasticIP = nil
+	}
 
 	// Display common instance information
 	DisplayCommonInstanceInfo(output)
@@ -157,7 +165,16 @@ func DisplayCommonInstanceInfo(inst *CommonInstanceInfo) {
 	util.CoriPrintf("  - instanceName        : %s \n", *inst.instanceName)
 	util.CoriPrintf("  - instanceID          : %s \n", *inst.instanceID)
 	util.CoriPrintf("  - networkInterfaceID  : %s \n", *inst.networkInterfaceID)
-	util.CoriPrintf("  - elasticIP           : %s \n", *inst.elasticIP)
-	util.CoriPrintf("  - elasticAllocationID : %s \n", *inst.elasticAllocationID)
+
+	if inst.elasticIP == nil {
+		util.CoriPrintf("  - elasticIP           : nil \n")
+	} else {
+		util.CoriPrintf("  - elasticIP           : %s \n", *inst.elasticIP)
+	}
+	if inst.elasticAllocationID == nil {
+		util.CoriPrintf("  - elasticAllocationID : nil \n")
+	} else {
+		util.CoriPrintf("  - elasticAllocationID : %s \n", *inst.elasticAllocationID)
+	}
 	util.CoriPrintf("  - publicIP            : %s \n\n", *inst.publicIP)
 }
