@@ -76,7 +76,7 @@ func GetCommonInstance() (*CommonInstanceInfo, error) {
 	elapsed := time.Since(start)
 	util.CoriPrintf("Elapsed time (Create Session) : %s\n", elapsed)
 
-	// Create EC2 instance session
+	// Get common EC2 instance information
 	svc := ec2.New(sess)
 	ret, err := GetCommonInstanceInfo(svc, aws.String(sampleName))
 	if err == nil {
@@ -118,6 +118,13 @@ func GetCommonInstanceInfo(svc *ec2.EC2, instanceName *string) (*CommonInstanceI
 		}
 	}
 
+	// Check whether the instance ID exists on AWS
+	if output.instanceID == nil {
+		msg := fmt.Sprintf("There isn't instance : %s", *instanceName)
+		util.CoriPrintln(msg)
+		return output, errors.New(msg)
+	}
+
 	// Describe elastic IP
 	output.elasticAllocationID, err = GetElasticAssociationID(svc, output.elasticIP)
 	if err != nil {
@@ -127,7 +134,7 @@ func GetCommonInstanceInfo(svc *ec2.EC2, instanceName *string) (*CommonInstanceI
 	// Display common instance information
 	DisplayCommonInstanceInfo(output)
 
-	return output, err
+	return output, nil
 }
 
 func GetElasticAssociationID(svc *ec2.EC2, elasticIP *string) (*string, error) {
