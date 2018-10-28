@@ -100,21 +100,28 @@ func GetCommonInstanceInfo(svc *ec2.EC2, instanceName *string) (*CommonInstanceI
 
 	// Get common instance information
 	output := new(CommonInstanceInfo)
-	for _, inst := range ret.Reservations[0].Instances {
-		if *inst.State.Code == 16 { // "running"
-			for _, tag := range inst.Tags {
-				if *tag.Key == "Name" {
-					output.instanceName = tag.Value
+	for _, reservation := range ret.Reservations {
+		for _, inst := range reservation.Instances {
+			if *inst.State.Code == 16 { // "running"
+				for _, tag := range inst.Tags {
+					if *tag.Key == "Name" {
+						output.instanceName = tag.Value
+						output.instanceID = inst.InstanceId
+						output.elasticIP = inst.PublicIpAddress
+						output.networkInterfaceID = inst.NetworkInterfaces[0].NetworkInterfaceId
+						output.publicIP = inst.NetworkInterfaces[0].Association.PublicIp
+						output.isInstanceCreated = true
+						output.isNetworkCreated = true
+						break
+					}
+				}
+				if output.isInstanceCreated {
 					break
 				}
 			}
-			output.instanceID = inst.InstanceId
-			output.elasticIP = inst.PublicIpAddress
-			output.networkInterfaceID = inst.NetworkInterfaces[0].NetworkInterfaceId
-			output.publicIP = inst.NetworkInterfaces[0].Association.PublicIp
-			output.isInstanceCreated = true
-			output.isNetworkCreated = true
-			break
+			if output.isInstanceCreated {
+				break
+			}
 		}
 	}
 
