@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	util "github.com/shawnhankim/cori-cloud/pkg/util"
@@ -28,6 +29,7 @@ import (
 )
 
 func ExampleExecCmd(inst *CommonInstanceInfo) {
+	start := time.Now()
 	res, err := ExecCmd(*inst.elasticIP, "ls -l /")
 	//res, err := ExecCmd("54.191.245.224", "ls -l /") //whoami")
 	if err != nil {
@@ -35,15 +37,20 @@ func ExampleExecCmd(inst *CommonInstanceInfo) {
 	} else {
 		util.CoriPrintln("Succeed to connect ssh", res)
 	}
+	elapsed := time.Since(start)
+	util.CoriPrintf("Elapsed time : %s\n", elapsed)
 }
 
 func ExampleSSH() {
-	res, err := ExecCmd("52.41.115.59", "ls -l /") //whoami")
+	start := time.Now()
+	res, err := ExecCmd("52.32.165.45", "ls -l /") //whoami")
 	if err != nil {
 		util.CoriPrintln("Failed to connect ssh", *res, err)
 	} else {
 		util.CoriPrintln("Succeed to connect ssh", *res)
 	}
+	elapsed := time.Since(start)
+	util.CoriPrintf("Elapsed time : %s\n", elapsed)
 }
 
 func ExecCmd(publicIP, cmd string) (*string, error) {

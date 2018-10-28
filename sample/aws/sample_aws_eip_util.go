@@ -123,3 +123,30 @@ func ReleaseElasticIP(svc *ec2.EC2, allocationID *string) error {
 	util.CoriPrintf("Successfully released allocation ID %s\n", allocationID)
 	return nil
 }
+
+// To disassociate an Elastic IP address in EC2-VPC
+//
+// This example disassociates an Elastic IP address from an instance in a VPC.
+func DisassociateAddress(svc *ec2.EC2, allocationID *string) error {
+	input := &ec2.DisassociateAddressInput{
+		AssociationId: allocationID,
+	}
+
+	result, err := svc.DisassociateAddress(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			default:
+				util.CoriPrintln(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			util.CoriPrintln(err.Error())
+		}
+		return err
+	}
+
+	util.CoriPrintln(result)
+	return nil
+}
