@@ -147,23 +147,24 @@ func CreateAWSEC2InstanceWitWaitInstanceExists() (*CommonInstanceInfo, error) {
 	output.publicIP = result.Reservations[0].Instances[0].PublicIpAddress
 	util.CoriPrintln("Found public IP: ", *output.publicIP)
 
-	// Create elastic IP
-	output.elasticIP, output.elasticAllocationID, err = ExampleEC2_AllocateAddress(output.ec2Service, *output.instanceID, *output.publicIP)
-	if err != nil {
-		util.CoriPrintln("Failed to create elastic IP", err)
-		return output, err
-	}
-	util.CoriPrintln("Successfully created elasticIP: ", *output.elasticIP)
+	/*
+		// Create elastic IP
+		output.elasticIP, output.elasticAllocationID, err = ExampleEC2_AllocateAddress(output.ec2Service, *output.instanceID, *output.publicIP)
+		if err != nil {
+			util.CoriPrintln("Failed to create elastic IP", err)
+			return output, err
+		}
+		util.CoriPrintln("Successfully created elasticIP: ", *output.elasticIP)
 
-	// Associate elastic IP to instance
-	_, err = ExampleEC2_AssociateAddress(output.ec2Service, *output.instanceID, *output.elasticIP)
-	if err != nil {
-		util.CoriPrintf("Failed to assotiated elasticIP (%s) to instance (%s), %v \n", *output.elasticIP, *output.instanceID, err)
-		return output, err
-	}
-	//result.Reservations[0].
-	util.CoriPrintf("Successfully assotiated elasticIP (%s) to instance (%s) \n", *output.elasticIP, *output.instanceID)
-
+		// Associate elastic IP to instance
+		_, err = ExampleEC2_AssociateAddress(output.ec2Service, *output.instanceID, *output.elasticIP)
+		if err != nil {
+			util.CoriPrintf("Failed to assotiated elasticIP (%s) to instance (%s), %v \n", *output.elasticIP, *output.instanceID, err)
+			return output, err
+		}
+		//result.Reservations[0].
+		util.CoriPrintf("Successfully assotiated elasticIP (%s) to instance (%s) \n", *output.elasticIP, *output.instanceID)
+	*/
 	// Display elapsed time
 	elapsed := time.Since(start)
 	util.CoriPrintf("Elapsed time : %s\n", elapsed)
