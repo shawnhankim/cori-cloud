@@ -32,6 +32,7 @@
     "private/protocol/query/queryutil",
     "private/protocol/rest",
     "private/protocol/xml/xmlutil",
+    "service/cloudformation",
     "service/ec2",
     "service/iam",
     "service/sts"
@@ -61,6 +62,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "51c35ece5ff5df9a5fa6e6190834fc1f5fca7783e7493c3b3bb012509d7bfe04"
+  inputs-digest = "41948ca787cd078a1a5fb391f9f5e0273fd3f2a4c1a7a8e1b8392a2b19385f90"
   solver-name = "gps-cdcl"
   solver-version = 1
