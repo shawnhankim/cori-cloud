@@ -178,7 +178,7 @@ func GetSampleSecurityGroupInput() *ec2.RunInstancesInput {
 		IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
 			Name: aws.String("Shawn-1029-BlueInstanceIAMProfile-6B0JD4HMAZKS"),
 		},
-		ImageId:      aws.String("ami-00f7c900d2e7133e1"), //ami-05eaea3305d6d7944"),
+		ImageId:      aws.String("ami-00f7c900d2e7133e1"), //ami-05eaea3305d6d7944"), CentOS 7.5 : ami-00f7c900d2e7133e1
 		InstanceType: aws.String("c4.large"),
 		KeyName:      aws.String("shawnkim-ssh"),
 		MinCount:     aws.Int64(1),
@@ -193,7 +193,7 @@ func GetSampleSecurityGroupInput() *ec2.RunInstancesInput {
 				Tags: []*ec2.Tag{
 					{
 						Key:   aws.String("Name"),
-						Value: aws.String("shawn-sample-centos")}, //sampleName)},
+						Value: aws.String("shawn-centos-master")}, //sampleName)},
 					{
 						Key:   aws.String("AutoPrune"),
 						Value: aws.String("False")},
