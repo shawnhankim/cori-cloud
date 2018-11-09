@@ -1,0 +1,9 @@
+Bring Your Own License (BYOL)
+-------------------------------------------------------------------------------
+- BYOL is process you can use to deploy software that you already have license. 
+- When you BYOL, you are responsible for managing your own licenses. 
+- You are responsible for managing true ups and renewals as required 
+  under your Volume Licensing agreement. 
+- In addition, you must submit a new verification form when you renew your 
+  agreement and when you deploy any previously unverified products.
+
