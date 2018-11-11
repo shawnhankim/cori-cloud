@@ -5,26 +5,30 @@ Identity Providers (IdP)
   Identity Assertion Provider, is an online service or website that authenticates
   users on the Internet by means of security tokens, one of which is SAML 2.0. In 
   the WS-Federation Model an Identity Provider is a Security Token Service (STS). 
-  Service Providers depend on an Identity Provider or Security Token Service to do
-  the user authentication. OAuth is an important protocol for IdP services as most
-  major web services are also identity providers, mainly through the use of OAuth.
-  These include Google, Facebook, Yahoo, AOL, Microsoft, PayPal, MySpace, and 
-  Flickr among many more. Furthermore, all major email providers offer OAuth IDP 
-  (Identity Provider) services.
+  
+- Service Providers depend on an Identity Provider or Security Token Service to do
+  the user authentication. 
+  
+- OAuth is an important protocol for IdP services as most major web services are 
+  also identity providers, mainly through the use of OAuth. These include Google,
+  Facebook, Yahoo, AOL, Microsoft, PayPal, MySpace, and Flickr among many more. 
+  Furthermore, all major email providers offer OAuth IDP services.
 
 - https://www2.empowerid.com/learningcenter/technologies/service-identity-providers
 
 
-SAML
+Security Assertion Markup Language (SAML)
 --------------------------------------------------------------------------------
-- Security Assertion Markup Language (SAML) is a standard protocol for web
-  browser Single Sign-On (SSO) using secure tokens. SAML completely eliminates 
-  all passwords and instead uses standard cryptography and digital signatures to
-  pass a secure sign-in token from an identity provider to a SaaS application. 
-  If you are an IT administrator, SAML can help you securely eliminate passwords
-  and deploy applications much faster. If you are an application vendor, SAML
-  can help you secure your application, reduce development costs and reach 
-  greater and faster adoption.
+- SAML is a standard protocol for web browser Single Sign-On using secure tokens.
+  SAML completely eliminates all passwords and instead uses standard cryptography
+  and digital signatures to pass a secure sign-in token from an identity provider
+  to a SaaS application. 
+
+- If you are an IT administrator, SAML can help you securely eliminate passwords
+  and deploy applications much faster.
+  
+- If you are an application vendor, SAML can help you secure your application,
+  reduce development costs and reach greater and faster adoption.
 
 - https://www.onelogin.com/pages/saml
 
