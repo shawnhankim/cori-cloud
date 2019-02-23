@@ -63,7 +63,7 @@ func CreateAWSEC2InstanceWitWaitInstanceExists() (*CommonInstanceInfo, error) {
 	output.ec2Service = ec2.New(sess)
 
 	// Run EC2 instance
-	input := GetSampleSecurityGroupInput()
+	input := GetSampleEC2Input() //GetSampleSecurityGroupInput()
 	runResult, err := output.ec2Service.RunInstances(input)
 	if err != nil {
 		util.CoriPrintln("Failed to create instance", err)
@@ -102,7 +102,7 @@ func CreateAWSEC2InstanceWitWaitInstanceExists() (*CommonInstanceInfo, error) {
 	util.CoriPrintln("Waiting for all network interfaces to be attached to find public IP...")
 	networkAttachedStatusErr := output.ec2Service.WaitUntilInstanceExists(&statusInput)
 	if networkAttachedStatusErr != nil {
-		util.CoriPrintln("Failed to wait until instances exist: %v", networkAttachedStatusErr)
+		util.CoriPrintf("Failed to wait until instances exist: %v\n", networkAttachedStatusErr)
 		return nil, networkAttachedStatusErr
 	}
 	util.CoriPrintln("Attached all network interfaces to find public IP...")

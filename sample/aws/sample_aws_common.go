@@ -35,7 +35,7 @@ type CommonInstanceInfo struct {
 
 var (
 	sampleKeyID   = "shawnkim-ssh"
-	sampleRegion  = "us-west-2"
+	sampleRegion  = "us-east-2"
 	sampleProfile = "my-account"
 	sampleName    = "Shawn-sample"
 )
