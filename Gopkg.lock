@@ -2,6 +2,7 @@
 
 
 [[projects]]
+  digest = "1:93f1e3076e54cbf39eefd78af5f45a1004338bbf84cd5c56b2e33f0f43334e19"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -28,25 +29,32 @@
     "internal/shareddefaults",
     "private/protocol",
     "private/protocol/ec2query",
+    "private/protocol/json/jsonutil",
+    "private/protocol/jsonrpc",
     "private/protocol/query",
     "private/protocol/query/queryutil",
     "private/protocol/rest",
     "private/protocol/xml/xmlutil",
     "service/cloudformation",
+    "service/dynamodb",
     "service/ec2",
     "service/iam",
-    "service/sts"
+    "service/sts",
   ]
+  pruneopts = "UT"
   revision = "f76d9803fd695eebf74cb23c460287fa496efc21"
   version = "v1.15.63"
 
 [[projects]]
+  digest = "1:e22af8c7518e1eab6f2eab2b7d7558927f816262586cd6ed9f349c97a6c285c4"
   name = "github.com/jmespath/go-jmespath"
   packages = ["."]
+  pruneopts = "UT"
   revision = "0b12d6b5"
 
 [[projects]]
   branch = "master"
+  digest = "1:2464e24610e1cdab712d3955745c0da6d1d26c50d6a7aecf61ebe07e68d2ec4d"
   name = "golang.org/x/crypto"
   packages = [
     "curve25519",
@@ -55,13 +63,25 @@
     "internal/chacha20",
     "internal/subtle",
     "poly1305",
-    "ssh"
+    "ssh",
   ]
+  pruneopts = "UT"
   revision = "e84da0312774c21d64ee2317962ef669b27ffb41"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "41948ca787cd078a1a5fb391f9f5e0273fd3f2a4c1a7a8e1b8392a2b19385f90"
+  input-imports = [
+    "github.com/aws/aws-sdk-go/aws",
+    "github.com/aws/aws-sdk-go/aws/awserr",
+    "github.com/aws/aws-sdk-go/aws/credentials",
+    "github.com/aws/aws-sdk-go/aws/ec2metadata",
+    "github.com/aws/aws-sdk-go/aws/session",
+    "github.com/aws/aws-sdk-go/service/cloudformation",
+    "github.com/aws/aws-sdk-go/service/dynamodb",
+    "github.com/aws/aws-sdk-go/service/ec2",
+    "github.com/aws/aws-sdk-go/service/iam",
+    "golang.org/x/crypto/ssh",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

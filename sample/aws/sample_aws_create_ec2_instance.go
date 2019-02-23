@@ -176,17 +176,17 @@ func GetSampleSecurityGroupInput() *ec2.RunInstancesInput {
 
 	return &ec2.RunInstancesInput{
 		IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
-			Name: aws.String("Shawn-1029-BlueInstanceIAMProfile-6B0JD4HMAZKS"),
+			Name: aws.String("Shawn-0214-BlueInstanceIAMProfile-1YINIIT0DXXH"),
 		},
-		ImageId:      aws.String("ami-00f7c900d2e7133e1"), //ami-05eaea3305d6d7944"), CentOS 7.5 : ami-00f7c900d2e7133e1
+		ImageId:      aws.String("ami-08fca8052a59e2b95"), //ami-05eaea3305d6d7944"), CentOS 7.5 : ami-00f7c900d2e7133e1
 		InstanceType: aws.String("c4.large"),
 		KeyName:      aws.String("shawnkim-ssh"),
 		MinCount:     aws.Int64(1),
 		MaxCount:     aws.Int64(1),
 		SecurityGroupIds: []*string{
-			aws.String("sg-040c268dd905e9239"),
+			aws.String("sg-061d133c688b3f918"),
 		},
-		SubnetId: aws.String("subnet-059d49181a476ccdb"),
+		SubnetId: aws.String("subnet-0497c73c3211e6e22"),
 		TagSpecifications: []*ec2.TagSpecification{
 			{
 				ResourceType: aws.String("instance"),
@@ -194,6 +194,44 @@ func GetSampleSecurityGroupInput() *ec2.RunInstancesInput {
 					{
 						Key:   aws.String("Name"),
 						Value: aws.String("shawn-centos-master")}, //sampleName)},
+					{
+						Key:   aws.String("AutoPrune"),
+						Value: aws.String("False")},
+					{
+						Key:   aws.String("Owner"),
+						Value: aws.String("Shawn")},
+					{
+						Key:   aws.String("KubernetesCluster"),
+						Value: aws.String("Shawn-sample")},
+				},
+			},
+		},
+	}
+}
+
+// GetSampleEC2Input returns EC2 instance input
+func GetSampleEC2Input() *ec2.RunInstancesInput {
+
+	return &ec2.RunInstancesInput{
+		//IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
+		//	Name: aws.String("Shawn-0214-BlueInstanceIAMProfile-1YINIIT0DXXH"),
+		//},
+		ImageId:      aws.String("ami-0cd3dfa4e37921605"), // Amazon Linux AMI
+		InstanceType: aws.String("t2.micro"),
+		KeyName:      aws.String("shawnkim-ssh"),
+		MinCount:     aws.Int64(1),
+		MaxCount:     aws.Int64(1),
+		//SecurityGroupIds: []*string{
+		//	aws.String("sg-061d133c688b3f918"),
+		//},
+		SubnetId: aws.String("subnet-05ae0dc4bbfaad921"),
+		TagSpecifications: []*ec2.TagSpecification{
+			{
+				ResourceType: aws.String("instance"),
+				Tags: []*ec2.Tag{
+					{
+						Key:   aws.String("Name"),
+						Value: aws.String("shawn-linux-master")}, //sampleName)},
 					{
 						Key:   aws.String("AutoPrune"),
 						Value: aws.String("False")},
