@@ -11,17 +11,19 @@ import (
 )
 
 var (
-	sampleKeyID   = "shawnkim-ssh"
-	sampleRegion  = "us-east-2"
-	sampleProfile = "my-account"
-	sampleName    = "Shawn-sample"
+	sampleRegion = "us-west-1"
 )
 
+func main() {
+	TestGetProductCode()
+}
+
+// TestGetProductCode is the example to get product code through AWS Marketplace
 func TestGetProductCode() {
 
 	// Get new session
 	sess, err := ses.NewSession(&aws.Config{
-		Region: aws.String(sampleRegion), // us-west-2
+		Region: aws.String(sampleRegion),
 	})
 	if err != nil {
 		fmt.Println("Failed to get a new session: ", err)
@@ -32,11 +34,25 @@ func TestGetProductCode() {
 	// Get EC2 service
 	ec2svc := ec2.New(sess)
 
-	instanceID := "i-001bebdda2a630711"
+	//instanceID := "i-001bebdda2a630711"
 	params := &ec2.DescribeInstancesInput{
-		InstanceIds: []*string{
-			&instanceID,
+		Filters: []*ec2.Filter{
+			// {
+			// 	Name: aws.String("image-id"),
+			// 	Values: []*string{
+			// 		aws.String("ami-05e518340f5c4837a"),
+			// 	},
+			// },
+			{
+				Name: aws.String("instance-id"),
+				Values: []*string{
+					aws.String("i-0381255a7afd3ba0f"),
+				},
+			},
 		},
+		//InstanceIds: []*string{
+		//	&instanceID,
+		//},
 	}
 	resp, err := ec2svc.DescribeInstances(params)
 	if err != nil {
@@ -69,7 +85,7 @@ func TestGetProductCode() {
 // ExampleEC2_ConfirmProductInstance_shared00
 // This example determines whether the specified product code is associated with the
 // specified instance.
-func main() {
+func ExampleEC2_ConfirmProductInstance_shared00() {
 	sess, err := ses.NewSession(&aws.Config{
 		Region: aws.String(sampleRegion), // us-west-2
 	})

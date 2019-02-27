@@ -216,15 +216,15 @@ func GetSampleEC2Input() *ec2.RunInstancesInput {
 		//IamInstanceProfile: &ec2.IamInstanceProfileSpecification{
 		//	Name: aws.String("Shawn-0214-BlueInstanceIAMProfile-1YINIIT0DXXH"),
 		//},
-		ImageId:      aws.String("ami-0cd3dfa4e37921605"), // Amazon Linux AMI
-		InstanceType: aws.String("t2.micro"),
+		ImageId:      aws.String("ami-05e518340f5c4837a"), //ami-0cd3dfa4e37921605"), // Amazon Linux AMI
+		InstanceType: aws.String("t2.large"),
 		KeyName:      aws.String("shawnkim-ssh"),
 		MinCount:     aws.Int64(1),
 		MaxCount:     aws.Int64(1),
 		//SecurityGroupIds: []*string{
 		//	aws.String("sg-061d133c688b3f918"),
 		//},
-		SubnetId: aws.String("subnet-05ae0dc4bbfaad921"),
+		SubnetId: aws.String("subnet-0e942cdf53e88f606"),
 		TagSpecifications: []*ec2.TagSpecification{
 			{
 				ResourceType: aws.String("instance"),
